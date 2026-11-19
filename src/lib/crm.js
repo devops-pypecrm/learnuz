@@ -57,7 +57,8 @@ export async function sendLeadToCrm(lead) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${settings.crmApiKey}`,
+        // pypecrm reads the key from the X-API-KEY header (it rejects "Authorization: Bearer").
+        'X-API-KEY': settings.crmApiKey,
       },
       body: JSON.stringify(lead),
       signal: AbortSignal.timeout(CRM_TIMEOUT_MS),
@@ -66,6 +67,8 @@ export async function sendLeadToCrm(lead) {
     if (!res.ok) {
       const body = await res.text().catch(() => '');
       console.error(`CRM rejected lead (HTTP ${res.status}):`, body.slice(0, 500));
+    } else {
+      console.log(`Lead sent to CRM (HTTP ${res.status})`);
     }
   } catch (error) {
     console.error('Error sending lead to CRM:', error);

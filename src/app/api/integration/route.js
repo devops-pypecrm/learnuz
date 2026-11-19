@@ -4,6 +4,7 @@ import dbConnect from '../../../lib/db';
 import IntegrationSettings from '../../../models/IntegrationSettings';
 
 // The saved API key is never sent back to the browser — only whether one is set and its last 4 characters.
+// (The admin API has no server-side login check yet, so returning the key would make it public.)
 function toPublic(settings) {
   const key = settings?.crmApiKey || '';
   return {

@@ -30,7 +30,8 @@ import {
   ExternalLink,
   ChevronRight,
   Star,
-  Plug
+  Plug,
+  EyeOff
 } from 'lucide-react';
 
 const safeNumber = (val) => {
@@ -73,6 +74,7 @@ export default function AdminDashboard() {
   const [crmEndpointUrl, setCrmEndpointUrl] = useState('');
   const [crmKeyInfo, setCrmKeyInfo] = useState({ hasApiKey: false, apiKeyLast4: '' });
   const [crmSaving, setCrmSaving] = useState(false);
+  const [showCrmApiKey, setShowCrmApiKey] = useState(false);
   const [testimonialModalOpen, setTestimonialModalOpen] = useState(false);
   const [editTestimonialTarget, setEditTestimonialTarget] = useState(null);
   const [testimonialForm, setTestimonialForm] = useState({
@@ -1474,17 +1476,28 @@ export default function AdminDashboard() {
                 >
                   <div>
                     <label htmlFor="crm-api-key" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">CRM API Key :</label>
-                    <input
-                      id="crm-api-key"
-                      type="password"
-                      autoComplete="new-password"
-                      value={crmApiKey}
-                      onChange={(e) => setCrmApiKey(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
-                      placeholder={crmKeyInfo.hasApiKey ? 'Leave blank to keep the saved key' : 'Enter CRM API key'}
-                    />
+                    <div className="relative">
+                      <input
+                        id="crm-api-key"
+                        type={showCrmApiKey ? 'text' : 'password'}
+                        autoComplete="new-password"
+                        value={crmApiKey}
+                        onChange={(e) => setCrmApiKey(e.target.value)}
+                        className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
+                        placeholder={crmKeyInfo.hasApiKey ? '••••••••••••  (saved — leave blank to keep it)' : 'Enter CRM API key'}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCrmApiKey((v) => !v)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                        title={showCrmApiKey ? 'Hide API key' : 'Show API key'}
+                        aria-label={showCrmApiKey ? 'Hide API key' : 'Show API key'}
+                      >
+                        {showCrmApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                     {crmKeyInfo.hasApiKey && (
-                      <p className="text-xs text-slate-400 mt-1.5">A key ending in <span className="font-bold text-slate-600">{crmKeyInfo.apiKeyLast4}</span> is saved. Enter a new key only to replace it.</p>
+                      <p className="text-xs text-emerald-600 font-semibold mt-1.5">✓ API key saved (ending in {crmKeyInfo.apiKeyLast4}). Type a new key only to replace it.</p>
                     )}
                   </div>
 
