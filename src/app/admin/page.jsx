@@ -69,6 +69,10 @@ export default function AdminDashboard() {
     workingHoursDesc: ''
   });
   const [detailsSaving, setDetailsSaving] = useState(false);
+  const [crmApiKey, setCrmApiKey] = useState('');
+  const [crmEndpointUrl, setCrmEndpointUrl] = useState('');
+  const [crmKeyInfo, setCrmKeyInfo] = useState({ hasApiKey: false, apiKeyLast4: '' });
+  const [crmSaving, setCrmSaving] = useState(false);
   const [testimonialModalOpen, setTestimonialModalOpen] = useState(false);
   const [editTestimonialTarget, setEditTestimonialTarget] = useState(null);
   const [testimonialForm, setTestimonialForm] = useState({
@@ -568,6 +572,46 @@ export default function AdminDashboard() {
       alert('An error occurred');
     } finally {
       setDetailsSaving(false);
+    }
+  };
+
+  // Load saved CRM settings when the Integration tab is opened (the API key itself is never returned)
+  useEffect(() => {
+    if (activeTab !== 'integration') return;
+    fetch('/api/integration')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) return;
+        setCrmEndpointUrl(data.crmEndpointUrl || '');
+        setCrmKeyInfo({ hasApiKey: data.hasApiKey, apiKeyLast4: data.apiKeyLast4 });
+        setCrmApiKey('');
+      })
+      .catch((error) => console.error('Error loading integration settings:', error));
+  }, [activeTab]);
+
+  const handleIntegrationSubmit = async (e) => {
+    e.preventDefault();
+    setCrmSaving(true);
+    try {
+      const res = await fetch('/api/integration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ crmApiKey, crmEndpointUrl })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setCrmEndpointUrl(data.crmEndpointUrl || '');
+        setCrmKeyInfo({ hasApiKey: data.hasApiKey, apiKeyLast4: data.apiKeyLast4 });
+        setCrmApiKey('');
+        alert('CRM integration settings saved successfully!');
+      } else {
+        alert(data.error || 'Failed to save CRM integration settings');
+      }
+    } catch (error) {
+      console.error('Error saving integration settings:', error);
+      alert('An error occurred');
+    } finally {
+      setCrmSaving(false);
     }
   };
 
@@ -1413,7 +1457,7 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* INTEGRATION TAB (interface only — no save logic yet) */}
+            {/* INTEGRATION TAB */}
             {activeTab === 'integration' && (
               <div className="space-y-6 animate-fadeIn">
                 <div>
@@ -1425,7 +1469,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <form
-                  onSubmit={(e) => e.preventDefault()}
+                  onSubmit={handleIntegrationSubmit}
                   className="bg-white rounded-3xl border border-slate-200/60 shadow-sm p-6 sm:p-8 space-y-6 max-w-3xl"
                 >
                   <div>
@@ -1433,11 +1477,15 @@ export default function AdminDashboard() {
                     <input
                       id="crm-api-key"
                       type="password"
-                      autoComplete="off"
-                      defaultValue=""
+                      autoComplete="new-password"
+                      value={crmApiKey}
+                      onChange={(e) => setCrmApiKey(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
-                      placeholder="Enter CRM API key"
+                      placeholder={crmKeyInfo.hasApiKey ? 'Leave blank to keep the saved key' : 'Enter CRM API key'}
                     />
+                    {crmKeyInfo.hasApiKey && (
+                      <p className="text-xs text-slate-400 mt-1.5">A key ending in <span className="font-bold text-slate-600">{crmKeyInfo.apiKeyLast4}</span> is saved. Enter a new key only to replace it.</p>
+                    )}
                   </div>
 
                   <div>
@@ -1446,7 +1494,8 @@ export default function AdminDashboard() {
                       id="crm-endpoint-url"
                       type="url"
                       autoComplete="off"
-                      defaultValue=""
+                      value={crmEndpointUrl}
+                      onChange={(e) => setCrmEndpointUrl(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                       placeholder="https://your-crm.com/api/v1/leads"
                     />
@@ -1454,9 +1503,11 @@ export default function AdminDashboard() {
 
                   <button
                     type="submit"
-                    className="px-8 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm cursor-pointer transition-all active:scale-95 shadow-md shadow-red-600/20"
+                    disabled={crmSaving}
+                    className="px-8 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm cursor-pointer transition-all active:scale-95 shadow-md shadow-red-600/20 flex items-center gap-2 disabled:opacity-80 disabled:cursor-wait"
                   >
-                    Save
+                    {crmSaving && <span className="w-3.5 h-3.5 rounded-full border-2 border-red-300 border-t-white animate-spin"></span>}
+                    <span>Save</span>
                   </button>
                 </form>
               </div>

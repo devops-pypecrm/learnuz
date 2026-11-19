@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic';
-import { NextResponse } from 'next/server';
+import { NextResponse, after } from 'next/server';
 import dbConnect from '../../../lib/db';
 import Registration from '../../../models/Registration';
+import { buildCrmLead, sendLeadToCrm } from '../../../lib/crm';
 
 export async function GET() {
   try {
@@ -42,6 +43,20 @@ export async function POST(request) {
 
     const registration = new Registration(data);
     await registration.save();
+
+    // Also send the lead to the CRM, after the response is returned to the visitor.
+    after(() => sendLeadToCrm(buildCrmLead({
+      formName: 'Register for University Programs',
+      fullName: registration.fullName,
+      email: registration.email,
+      phone: registration.phone,
+      extraFields: [
+        ['Courses', registration.degreeLevel],
+        ['University', registration.university],
+        ['Selected Program', registration.program],
+      ],
+    })));
+
     return NextResponse.json(registration, { status: 201 });
   } catch (error) {
     console.error('Error saving registration:', error);
