@@ -29,7 +29,8 @@ import {
   HelpCircle,
   ExternalLink,
   ChevronRight,
-  Star
+  Star,
+  Plug
 } from 'lucide-react';
 
 const safeNumber = (val) => {
@@ -339,6 +340,19 @@ export default function AdminDashboard() {
       const res = await fetch(`/api/contacts/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setViewContactModal(null);
+        fetchData();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Delete Enrollment Lead
+  const handleRegistrationDelete = async (id) => {
+    if (!confirm("Delete this enrollment lead?")) return;
+    try {
+      const res = await fetch(`/api/registrations/${id}`, { method: 'DELETE' });
+      if (res.ok) {
         fetchData();
       }
     } catch (error) {
@@ -666,14 +680,15 @@ export default function AdminDashboard() {
 
         {/* Tab switcher navigation */}
         <div className="flex border-b border-slate-200 mb-8 bg-white p-1.5 rounded-2xl shadow-sm border overflow-x-auto" data-lenis-prevent>
-          {['overview', 'universities', 'programs', 'leads', 'testimonials', 'contact-details'].map((tab) => {
+          {['overview', 'universities', 'programs', 'leads', 'testimonials', 'contact-details', 'integration'].map((tab) => {
             const labelMap = {
               overview: 'Overview',
               universities: 'Universities',
               programs: 'Programs',
               leads: 'Leads & Inquiries',
               testimonials: 'Testimonials',
-              'contact-details': 'Contact Details'
+              'contact-details': 'Contact Details',
+              integration: 'Integration'
             };
             const isActive = activeTab === tab;
             return (
@@ -1109,7 +1124,16 @@ export default function AdminDashboard() {
                         <div key={reg._id} className="pt-3 first:pt-0">
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-slate-800 text-sm">{reg.fullName}</span>
-                            <span className="text-[10px] text-slate-400 font-semibold">{new Date(reg.createdAt).toLocaleDateString()}</span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[10px] text-slate-400 font-semibold">{new Date(reg.createdAt).toLocaleDateString()}</span>
+                              <button
+                                onClick={() => handleRegistrationDelete(reg._id)}
+                                className="p-1.5 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50/50 transition-colors cursor-pointer"
+                                title="Delete Lead"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
                           <p className="text-xs font-bold text-slate-700 mt-1 bg-slate-50 border border-slate-100 p-2 rounded-xl">
                             <span className="text-indigo-600">{reg.degreeLevel}</span>: {reg.program} {reg.university ? `(${reg.university})` : ''}
@@ -1385,6 +1409,55 @@ export default function AdminDashboard() {
                       <span>Save Changes</span>
                     </button>
                   </div>
+                </form>
+              </div>
+            )}
+
+            {/* INTEGRATION TAB (interface only — no save logic yet) */}
+            {activeTab === 'integration' && (
+              <div className="space-y-6 animate-fadeIn">
+                <div>
+                  <h3 className="font-extrabold text-2xl text-slate-900 flex items-center gap-2">
+                    <Plug className="w-6 h-6 text-indigo-500" />
+                    <span>Integration</span>
+                  </h3>
+                  <p className="text-sm text-slate-500 mt-1">Configure CRM connection details.</p>
+                </div>
+
+                <form
+                  onSubmit={(e) => e.preventDefault()}
+                  className="bg-white rounded-3xl border border-slate-200/60 shadow-sm p-6 sm:p-8 space-y-6 max-w-3xl"
+                >
+                  <div>
+                    <label htmlFor="crm-api-key" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">CRM API Key :</label>
+                    <input
+                      id="crm-api-key"
+                      type="password"
+                      autoComplete="off"
+                      defaultValue=""
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
+                      placeholder="Enter CRM API key"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="crm-endpoint-url" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">CRM Endpoint URL :</label>
+                    <input
+                      id="crm-endpoint-url"
+                      type="url"
+                      autoComplete="off"
+                      defaultValue=""
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
+                      placeholder="https://your-crm.com/api/v1/leads"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="px-8 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm cursor-pointer transition-all active:scale-95 shadow-md shadow-red-600/20"
+                  >
+                    Save
+                  </button>
                 </form>
               </div>
             )}
