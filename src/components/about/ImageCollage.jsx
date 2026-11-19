@@ -4,25 +4,25 @@ import { motion } from 'framer-motion';
 export default function ImageCollage() {
   const images = [
     {
-      src: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTN4y2EX15tD3fa1OBzy50Z4jE-5yEOYq3UWw&s',
+      src: 'https://img.magnific.com/premium-photo/group-business-man-people-with-laptop_862994-614942.jpg',
       alt: 'Graduation Ceremony',
       className: 'w-[65%] aspect-[4/3] z-10 top-0 left-0 shadow-2xl',
       delay: 0.1,
     },
     {
-      src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600',
+      src: 'https://images.pexels.com/photos/37954917/pexels-photo-37954917/free-photo-of-group-of-business-students-outdoors-socializing.jpeg?cs=tinysrgb&dpr=1&w=500',
       alt: 'Students Group Discussion',
       className: 'w-[60%] aspect-[4/3] z-20 top-[25%] right-0 shadow-2xl',
       delay: 0.3,
     },
     {
-      src: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=600',
+      src: 'https://www.globemoving.net/api/media/file/Best-International-Schools-in-Mumbai-Banner-2.png/',
       alt: 'Student Counselling Session',
       className: 'w-[50%] aspect-square z-30 bottom-0 left-[10%] shadow-xl',
       delay: 0.5,
     },
     {
-      src: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=600',
+      src: 'https://img.magnific.com/premium-photo/young-indian-girl-happy-background-portrait_53876-1151608.jpg?semt=ais_hybrid&w=740&q=80',
       alt: 'Campus Life',
       className: 'w-[45%] aspect-[3/4] z-0 top-[10%] left-[30%] opacity-80 filter blur-[1px] hidden sm:block',
       delay: 0.2,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, CheckCircle, GraduationCap, ArrowRight, Shield } from 'lucide-react';
+import { X, GraduationCap, ArrowRight, Shield, Loader2, CheckCircle } from 'lucide-react';
 import LearnuzLogo from './LearnuzLogo';
 import { initialPrograms } from '../data/programs';
 
@@ -47,7 +47,8 @@ export default function RegisterModal({ isOpen, onClose, selectedCourse }) {
     university: selectedCourse?.university ? selectedCourse.university : 'All Universities'
   });
 
-  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
 
   // Set mounted state on client
   useEffect(() => {
@@ -165,6 +166,8 @@ export default function RegisterModal({ isOpen, onClose, selectedCourse }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting || alreadyRegistered) return;
+    setSubmitting(true);
     try {
       const res = await fetch('/api/registrations', {
         method: 'POST',
@@ -174,21 +177,22 @@ export default function RegisterModal({ isOpen, onClose, selectedCourse }) {
         body: JSON.stringify(formData),
       });
       if (res.ok) {
-        setSubmitted(true);
+        onClose();
       } else {
-        const errorData = await res.json();
-        console.error('Failed to submit application:', errorData.error);
-        alert(errorData.error || 'Failed to submit application. Please try again.');
+        const errorData = await res.json().catch(() => ({}));
+        if (res.status === 409 || errorData.alreadyRegistered) {
+          setAlreadyRegistered(true);
+        } else {
+          console.error('Failed to submit application:', errorData.error);
+          alert(errorData.error || 'Failed to submit application. Please try again.');
+        }
       }
     } catch (error) {
       console.error('Error submitting application:', error);
       alert('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
-  };
-
-  const handleReset = () => {
-    setSubmitted(false);
-    onClose();
   };
 
   const modalContent = (
@@ -203,23 +207,6 @@ export default function RegisterModal({ isOpen, onClose, selectedCourse }) {
           <X className="w-5 h-5" />
         </button>
 
-        {submitted ? (
-          <div className="p-8 text-center space-y-4">
-            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2 animate-bounce">
-              <CheckCircle className="w-10 h-10" />
-            </div>
-            <h3 className="text-2xl font-bold text-slate-900">Application Received!</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Thank you, <span className="font-semibold text-slate-900">{formData.fullName || 'Learner'}</span>! Our academic advisors will reach out to <span className="font-semibold text-slate-900">{formData.email}</span> within 24 hours with your enrollment details and university portal access.
-            </p>
-            <button
-              onClick={handleReset}
-              className="mt-6 w-full py-3 rounded-2xl bg-blue-600 text-white font-bold text-sm shadow-lg shadow-blue-500/25 hover:bg-blue-700 transition-all cursor-pointer"
-            >
-              Done
-            </button>
-          </div>
-        ) : (
           <div className="p-6 sm:p-8">
             
             {/* Header */}
@@ -259,7 +246,7 @@ export default function RegisterModal({ isOpen, onClose, selectedCourse }) {
                     required
                     placeholder="alex@example.com"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => { setAlreadyRegistered(false); setFormData({ ...formData, email: e.target.value }); }}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
@@ -270,9 +257,10 @@ export default function RegisterModal({ isOpen, onClose, selectedCourse }) {
                   </label>
                   <input
                     type="tel"
+                    required
                     placeholder="+1 (555) 000-0000"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => { setAlreadyRegistered(false); setFormData({ ...formData, phone: e.target.value }); }}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
@@ -281,7 +269,7 @@ export default function RegisterModal({ isOpen, onClose, selectedCourse }) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Degree Level
+                    COURSES
                   </label>
                   <select
                     disabled={selectedCourse && !!selectedCourse.title}
@@ -342,13 +330,36 @@ export default function RegisterModal({ isOpen, onClose, selectedCourse }) {
               </div>
 
               <div className="pt-2">
-                <button
-                  type="submit"
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span>Submit Application</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                {alreadyRegistered ? (
+                  <>
+                    <button
+                      type="button"
+                      disabled
+                      className="w-full py-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-sm flex items-center justify-center gap-2 cursor-not-allowed"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Already Registered</span>
+                    </button>
+                    <p className="text-xs text-slate-500 text-center mt-2">
+                      This email or phone number is already registered. Our advisors will contact you soon.
+                    </p>
+                  </>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-80 disabled:cursor-wait disabled:hover:scale-100"
+                  >
+                    {submitting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <span>Submit Application</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
 
               <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 pt-1">
@@ -357,7 +368,6 @@ export default function RegisterModal({ isOpen, onClose, selectedCourse }) {
               </div>
             </form>
           </div>
-        )}
 
       </div>
     </div>

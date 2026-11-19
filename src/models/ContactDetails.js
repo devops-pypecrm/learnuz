@@ -17,7 +17,7 @@ const ContactDetailsSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    default: 'support@learnuz.com'
+    default: 'learnuz.info@learnuzonline.com'
   },
   emailLabel: {
     type: String,

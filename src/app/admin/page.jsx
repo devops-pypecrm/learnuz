@@ -1295,7 +1295,7 @@ export default function AdminDashboard() {
                           value={contactDetails.email}
                           onChange={(e) => setContactDetails({ ...contactDetails, email: e.target.value })}
                           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 bg-white"
-                          placeholder="e.g. support@learnuz.com"
+                          placeholder="e.g. learnuz.info@learnuzonline.com"
                         />
                       </div>
                       <div>

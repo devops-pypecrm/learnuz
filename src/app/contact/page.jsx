@@ -28,7 +28,7 @@ export default function ContactPage() {
     phone: '+91 98765 43210',
     phoneLabel: 'Call Us',
     phoneDesc: 'Direct connect to student support team',
-    email: 'support@learnuz.com',
+    email: 'learnuz.info@learnuzonline.com',
     emailLabel: 'Email Us',
     emailDesc: '2-4 hour response time for active tickets',
     hqTitle: 'Kochi, Kerala',

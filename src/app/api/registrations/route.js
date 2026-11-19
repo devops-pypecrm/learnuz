@@ -22,7 +22,24 @@ export async function POST(request) {
     if (!data.fullName || !data.email || !data.phone || !data.program || !data.degreeLevel) {
       return NextResponse.json({ error: 'Please provide all required fields.' }, { status: 400 });
     }
-    
+
+    // Only one registration is allowed per email address and per phone number.
+    const email = String(data.email).trim();
+    const phoneDigits = String(data.phone).replace(/\D/g, '');
+    const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const duplicateConditions = [{ email: new RegExp(`^\\s*${escapeRegex(email)}\\s*$`, 'i') }];
+    if (phoneDigits) {
+      // Match the same digits regardless of spaces, dashes, brackets or a leading "+".
+      duplicateConditions.push({ phone: new RegExp(`^\\D*${phoneDigits.split('').join('\\D*')}\\D*$`) });
+    }
+    const existing = await Registration.findOne({ $or: duplicateConditions }).lean();
+    if (existing) {
+      return NextResponse.json(
+        { error: 'You have already registered with this email or phone number.', alreadyRegistered: true },
+        { status: 409 }
+      );
+    }
+
     const registration = new Registration(data);
     await registration.save();
     return NextResponse.json(registration, { status: 201 });
