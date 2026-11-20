@@ -170,8 +170,11 @@ export default function AnimatedHeading({
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
+        {/* Full heading text for search engines and screen readers (the typed letters below start empty) */}
+        <span className="sr-only">{headings[0].lines.join(' ').replace(/\s+/g, ' ').trim()}</span>
         {lineInfo.map((info, idx) => (
-          <span 
+          <span
+            aria-hidden="true"
             key={`line-${idx}-${headingIndex}`}
             className={`block min-h-[1.2em] overflow-hidden py-0.5 ${
               idx === lineInfo.length - 1 ? 'text-blue-950' : ''

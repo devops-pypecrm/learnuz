@@ -130,8 +130,12 @@ export default function Hero({ onSearch, onOpenRegister, onOpenCourseFinder }) {
 
               {/* Student Image */}
               <img
-                src="/hero-student.png"
-                alt="Student with blue backpack and notebook"
+                src="/hero-student.webp"
+                alt="Smiling student holding books and wearing a backpack"
+                width={900}
+                height={1358}
+                fetchPriority="high"
+                decoding="async"
                 className="w-full max-w-xs sm:max-w-sm lg:max-w-md h-auto object-contain relative z-10 drop-shadow-2xl block"
               />
 

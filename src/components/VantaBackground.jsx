@@ -71,7 +71,7 @@ export default function VantaBackground() {
     <>
       <Script
         src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         onLoad={() => {
           setThreeLoaded(true);
         }}

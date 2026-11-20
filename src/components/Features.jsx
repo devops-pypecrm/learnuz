@@ -85,8 +85,12 @@ export default function Features() {
             {/* Student Visual */}
             <div className="relative z-10 mt-auto flex justify-center">
               <img
-                src="/feature-student.png"
+                src="/feature-student.webp"
                 alt="University Student"
+                width={640}
+                height={640}
+                loading="lazy"
+                decoding="async"
                 className="w-full max-w-xs h-auto object-contain rounded-2xl drop-shadow-lg group-hover:scale-105 transition-transform duration-500"
               />
             </div>
