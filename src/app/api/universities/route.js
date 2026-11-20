@@ -1,6 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import dbConnect from '../../../lib/db';
+import { UNIVERSITIES_TAG } from '../../../lib/serverData';
 import University from '../../../models/University';
 import { universities as initialUniversities } from '../../../data/universities';
 
@@ -41,6 +43,7 @@ export async function POST(request) {
     
     const university = new University(data);
     await university.save();
+    revalidateTag(UNIVERSITIES_TAG); // refresh cached university data on public pages
     return NextResponse.json(university, { status: 201 });
   } catch (error) {
     console.error('Error creating university:', error);

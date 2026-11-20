@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import dbConnect from '../../../../lib/db';
+import { PROGRAMS_TAG } from '../../../../lib/serverData';
 import Program from '../../../../models/Program';
 
 export async function PUT(request, { params }) {
@@ -13,7 +15,8 @@ export async function PUT(request, { params }) {
     if (!program) {
       return NextResponse.json({ error: 'Program not found' }, { status: 404 });
     }
-    
+
+    revalidateTag(PROGRAMS_TAG); // refresh cached program lists on public pages
     return NextResponse.json(program);
   } catch (error) {
     console.error('Error updating program:', error);
@@ -31,7 +34,8 @@ export async function DELETE(request, { params }) {
     if (!program) {
       return NextResponse.json({ error: 'Program not found' }, { status: 404 });
     }
-    
+
+    revalidateTag(PROGRAMS_TAG); // refresh cached program lists on public pages
     return NextResponse.json({ message: 'Program deleted successfully' });
   } catch (error) {
     console.error('Error deleting program:', error);

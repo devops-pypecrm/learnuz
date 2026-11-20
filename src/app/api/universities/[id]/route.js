@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import dbConnect from '../../../../lib/db';
+import { UNIVERSITIES_TAG } from '../../../../lib/serverData';
 import University from '../../../../models/University';
 
 export async function GET(request, { params }) {
@@ -33,7 +35,8 @@ export async function PUT(request, { params }) {
     if (!university) {
       return NextResponse.json({ error: 'University not found' }, { status: 404 });
     }
-    
+
+    revalidateTag(UNIVERSITIES_TAG); // refresh cached university data on public pages
     return NextResponse.json(university);
   } catch (error) {
     console.error('Error updating university:', error);
@@ -51,7 +54,8 @@ export async function DELETE(request, { params }) {
     if (!university) {
       return NextResponse.json({ error: 'University not found' }, { status: 404 });
     }
-    
+
+    revalidateTag(UNIVERSITIES_TAG); // refresh cached university data on public pages
     return NextResponse.json({ message: 'University deleted successfully' });
   } catch (error) {
     console.error('Error deleting university:', error);

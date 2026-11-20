@@ -176,6 +176,10 @@ export default function Testimonials({ onOpenRegister }) {
                 <img
                   src={item.avatar || item.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
                   alt={item.name}
+                  width={48}
+                  height={48}
+                  loading="lazy"
+                  decoding="async"
                   className="w-12 h-12 rounded-full object-cover border-2 border-blue-500 shadow-sm"
                 />
                 <div>

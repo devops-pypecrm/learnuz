@@ -123,7 +123,6 @@ export default function Footer({ onOpenRegister }) {
             <a href="#" className="hover:text-slate-400">Privacy Policy</a>
             <a href="#" className="hover:text-slate-400">Terms of Service</a>
             <a href="#" className="hover:text-slate-400">Academic Code</a>
-            <a href="/admin/login" className="hover:text-blue-400 font-semibold text-blue-400/80 transition-colors">Admin Login</a>
           </div>
         </div>
 

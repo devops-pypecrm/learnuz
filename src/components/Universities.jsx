@@ -9,6 +9,23 @@ import { universities as staticUniversities } from '../data/universities';
 // The university name as a real link, so search engines can follow it to the university page.
 // The whole card is already clickable (its onClick navigates), so the link lets the click bubble up to it
 // instead of navigating a second time.
+// Adds the state to a city name. Locations that already include a state ("Jaipur, Rajasthan") are shown as-is.
+const CITY_STATES = {
+  'Aligarh': 'UP',
+  'Mathura': 'UP',
+  'Noida': 'UP',
+  'Bengaluru': 'KA',
+  'Manipal': 'KA',
+  'New Delhi': 'DL',
+  'Gangtok': 'SK',
+  'Mohali': 'PB',
+};
+function formatLocation(location) {
+  if (!location) return '';
+  if (location.includes(',')) return location;
+  return CITY_STATES[location] ? `${location}, ${CITY_STATES[location]}` : location;
+}
+
 // Until the real universities are loaded from the database, the cards show built-in sample data whose
 // pages may not exist — so the link is only rendered for loaded (real) universities.
 function UniversityNameLink({ university, children }) {
@@ -62,7 +79,7 @@ function FeaturedCard({ university, onClick, programs = [] }) {
           <div className="flex flex-wrap items-center gap-3 mt-3">
             <span className="flex items-center gap-1 text-slate-300 text-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-              {location}, UP
+              {formatLocation(location)}
             </span>
             <span className="px-2.5 py-0.5 bg-amber-400 text-slate-950 text-[10px] font-black rounded-md uppercase tracking-wider">
               {naacGrade}
@@ -125,8 +142,7 @@ function WideUniversityCard({ university, onClick, programs = [] }) {
   if (!university) return null;
   const { name, shortName, location, naacGrade, programsCount, feeRange, coverImage } = university;
   
-  // Format state suffix for locations
-  const displayLocation = location === 'Bengaluru' ? 'Bengaluru, KA' : `${location}, UP`;
+  const displayLocation = formatLocation(location);
 
   return (
     <div 
@@ -226,12 +242,17 @@ function ComparisonBanner({ title, subtitle, buttonText, onClick }) {
   );
 }
 
-export default function Universities({ onOpenCompare }) {
+export default function Universities({ onOpenCompare, initialUniversities = null, initialPrograms = null }) {
   const router = useRouter();
-  const [universitiesList, setUniversitiesList] = React.useState(staticUniversities);
-  const [programsData, setProgramsData] = React.useState([]);
+  // Real data from the server when available; the built-in sample list is only a last-resort fallback.
+  const hasInitialData = Array.isArray(initialUniversities) && initialUniversities.length > 0 && Array.isArray(initialPrograms);
+  const [universitiesList, setUniversitiesList] = React.useState(
+    hasInitialData ? initialUniversities.map((u) => ({ ...u, isLoaded: true })) : staticUniversities
+  );
+  const [programsData, setProgramsData] = React.useState(hasInitialData ? initialPrograms : []);
 
   React.useEffect(() => {
+    if (hasInitialData) return; // already loaded on the server
     async function loadData() {
       try {
         const [uniRes, progRes] = await Promise.all([
@@ -262,10 +283,12 @@ export default function Universities({ onOpenCompare }) {
     );
   };
 
-  // Retrieve featured universities dynamically by ID for Set 1
-  const uniAmu = universitiesList.find(u => u.id === 'amu') || universitiesList[0];
-  const uniGla = universitiesList.find(u => u.id === 'gla') || universitiesList[1];
-  const uniJain = universitiesList.find(u => u.id === 'jain') || universitiesList[2];
+  // Pick 3 different universities for the cards: those marked "featured" first (in the list's order,
+  // which is featured → highest rating), then the rest to fill any empty spot. No university appears twice.
+  const [uniAmu, uniGla, uniJain] = [
+    ...universitiesList.filter(u => u.featured),
+    ...universitiesList.filter(u => !u.featured),
+  ].filter((u, i, arr) => arr.findIndex(x => x.id === u.id) === i).slice(0, 3);
 
   const uniAmuPrograms = getUniPrograms(uniAmu);
   const uniGlaPrograms = getUniPrograms(uniGla);

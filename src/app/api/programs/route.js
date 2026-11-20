@@ -1,6 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import dbConnect from '../../../lib/db';
+import { PROGRAMS_TAG } from '../../../lib/serverData';
 import Program from '../../../models/Program';
 import { initialPrograms } from '../../../data/programs';
 
@@ -35,6 +37,7 @@ export async function POST(request) {
     
     const program = new Program(data);
     await program.save();
+    revalidateTag(PROGRAMS_TAG); // refresh cached program lists on public pages
     return NextResponse.json(program, { status: 201 });
   } catch (error) {
     console.error('Error creating program:', error);

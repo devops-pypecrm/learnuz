@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 export default function ImageCollage() {
@@ -45,11 +46,13 @@ export default function ImageCollage() {
           whileHover={{ scale: 1.03, zIndex: 40, transition: { duration: 0.3 } }}
           className={`absolute rounded-3xl overflow-hidden border-4 border-white shadow-slate-900/10 ${img.className}`}
         >
-          <img
+          {/* next/image resizes and converts these (external) photos, e.g. a 946 KB banner becomes ~22 KB */}
+          <Image
             src={img.src}
             alt={img.alt}
-            className="w-full h-full object-cover rounded-2xl transform hover:scale-105 transition-transform duration-700"
-            loading="lazy"
+            fill
+            sizes="(max-width: 640px) 65vw, 390px"
+            className="object-cover rounded-2xl transform hover:scale-105 transition-transform duration-700"
           />
         </motion.div>
       ))}

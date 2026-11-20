@@ -148,6 +148,8 @@ export default function Testimonials() {
                 <img
                   src={currentTestimonial.image || currentTestimonial.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
                   alt={currentTestimonial.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-2 right-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-[9px] px-2 py-0.5 rounded-full uppercase">

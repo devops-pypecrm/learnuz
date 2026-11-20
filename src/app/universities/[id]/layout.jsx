@@ -1,19 +1,13 @@
 import { socialMeta } from '../../../lib/site';
-import dbConnect from '../../../lib/db';
-import University from '../../../models/University';
+import { getUniversityById } from '../../../lib/serverData';
 
 // Gives every university page its own title and description, e.g. "GLA University Online Degrees – Fees, Courses & Admission | Learnuz".
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const path = `/universities/${encodeURIComponent(id)}`;
 
-  let uni = null;
-  try {
-    await dbConnect();
-    uni = await University.findOne({ id }, { name: 1, location: 1, naacGrade: 1, feeRange: 1, description: 1 }).lean();
-  } catch (error) {
-    console.error('University metadata: could not load university:', error);
-  }
+  // Uses the same cached loader as the page, so this doesn't add a second database call.
+  const { university: uni } = await getUniversityById(id);
 
   if (!uni) {
     return {
