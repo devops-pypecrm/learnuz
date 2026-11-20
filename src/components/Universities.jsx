@@ -6,6 +6,24 @@ import { ArrowRight, Building2 } from 'lucide-react';
 import { universities as staticUniversities } from '../data/universities';
 
 // Subcomponent: Large Featured Card (Column 1)
+// The university name as a real link, so search engines can follow it to the university page.
+// The whole card is already clickable (its onClick navigates), so the link lets the click bubble up to it
+// instead of navigating a second time.
+// Until the real universities are loaded from the database, the cards show built-in sample data whose
+// pages may not exist — so the link is only rendered for loaded (real) universities.
+function UniversityNameLink({ university, children }) {
+  if (!university.isLoaded) return children;
+  return (
+    <a
+      href={`/universities/${encodeURIComponent(university.id)}`}
+      onClick={(e) => e.preventDefault()}
+      className="text-inherit no-underline"
+    >
+      {children}
+    </a>
+  );
+}
+
 function FeaturedCard({ university, onClick, programs = [] }) {
   if (!university) return null;
   const { name, shortName, location, naacGrade, established, programsCount, studentsCount, feeRange, coverImage } = university;
@@ -37,7 +55,7 @@ function FeaturedCard({ university, onClick, programs = [] }) {
         {/* Title, Location & NAAC */}
         <div className="mt-auto">
           <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight tracking-tight">
-            {name}
+            <UniversityNameLink university={university}>{name}</UniversityNameLink>
           </h3>
           <span className="text-slate-300 text-xs font-semibold tracking-wider block mt-1">({shortName})</span>
           
@@ -128,7 +146,7 @@ function WideUniversityCard({ university, onClick, programs = [] }) {
         <div className="flex justify-between items-start">
           <div className="min-w-0 pr-3">
             <h3 className="text-lg font-black text-white tracking-tight leading-tight truncate">
-              {name}
+              <UniversityNameLink university={university}>{name}</UniversityNameLink>
             </h3>
             <span className="text-slate-300 text-xs font-semibold mt-0.5 block">({shortName})</span>
           </div>
@@ -222,7 +240,7 @@ export default function Universities({ onOpenCompare }) {
         ]);
         if (uniRes.ok) {
           const uniData = await uniRes.json();
-          setUniversitiesList(uniData);
+          setUniversitiesList(uniData.map((u) => ({ ...u, isLoaded: true })));
         }
         if (progRes.ok) {
           const progData = await progRes.json();

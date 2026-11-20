@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { MapPin, Star, Heart, Calendar, Users, ArrowRight, Package } from 'lucide-react';
 import DynUniversityLogo from './UniversityLogo';
@@ -41,6 +42,15 @@ export default function UniversityCard({ university, onSelect, programs = [] }) 
 
   // For Aligarh, we do not append shortName to match the mockup
   const displayName = id === 'amu' ? name : `${name} (${shortName})`;
+
+  // Real link (so search engines can follow it); clicks still go through onSelect when provided.
+  const detailsHref = `/universities/${encodeURIComponent(id)}`;
+  const handleDetailsClick = (e) => {
+    if (onSelect) {
+      e.preventDefault();
+      onSelect(university);
+    }
+  };
 
   return (
     <motion.div
@@ -91,7 +101,9 @@ export default function UniversityCard({ university, onSelect, programs = [] }) 
           <div>
             {/* University Name */}
             <h3 className="text-sm sm:text-base font-extrabold text-[#091E42] tracking-tight leading-tight line-clamp-2">
-              {displayName}
+              <Link href={detailsHref} onClick={handleDetailsClick} className="hover:underline underline-offset-2">
+                {displayName}
+              </Link>
             </h3>
 
             {/* Location with Pin */}
@@ -185,13 +197,15 @@ export default function UniversityCard({ university, onSelect, programs = [] }) 
             {feeRange.replace('–', '-')}
           </span>
         </div>
-        <button
-          onClick={() => onSelect && onSelect(university)}
+        <Link
+          href={detailsHref}
+          onClick={handleDetailsClick}
+          aria-label={`View details for ${name}`}
           className="bg-[#032B69] hover:bg-[#002f6c] text-[#ffffff] px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-md shadow-blue-900/5 group/btn"
         >
           <span>View Details</span>
           <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5" />
-        </button>
+        </Link>
       </div>
     </motion.div>
   );

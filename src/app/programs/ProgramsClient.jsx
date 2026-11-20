@@ -199,6 +199,10 @@ function ProgramsContent({ initialPrograms, initialUniversities }) {
 
       {/* Main Programs Grid */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24">
+        {/* Section heading for search engines and screen readers (visually hidden to keep the design unchanged) */}
+        <h2 className="sr-only">
+          {activeCategory === 'All' ? 'All Online Degree Programs' : `${activeCategory} Online Programs`}
+        </h2>
         {filteredPrograms.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-3xl border border-slate-100 p-8 shadow-sm">
             <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-4" />

@@ -28,14 +28,19 @@ export async function getUniversities() {
   }
 }
 
+/**
+ * @returns {Promise<{ university: object|null, failed: boolean }>}
+ *   university: null + failed: false  → the university does not exist
+ *   university: null + failed: true   → the database could not be reached
+ */
 export async function getUniversityById(id) {
   try {
     await dbConnect();
     const uni = await University.findOne({ id }).lean();
-    return uni ? toPlain(uni) : null;
+    return { university: uni ? toPlain(uni) : null, failed: false };
   } catch (error) {
     console.error('Server data: could not load university:', error);
-    return null;
+    return { university: null, failed: true };
   }
 }
 

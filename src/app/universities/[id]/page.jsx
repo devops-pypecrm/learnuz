@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation';
 import UniversityDetailClient from './UniversityDetailClient';
 import { getPrograms, getUniversityById, programsForUniversity } from '../../../lib/serverData';
 import { SITE_URL } from '../../../lib/site';
@@ -7,7 +8,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function UniversityDetailPage({ params }) {
   const { id } = await params;
-  const [university, allPrograms] = await Promise.all([getUniversityById(id), getPrograms()]);
+  const [{ university, failed }, allPrograms] = await Promise.all([getUniversityById(id), getPrograms()]);
+
+  // The university really doesn't exist → proper 404 "Not found" page (tells search engines it's gone).
+  if (!university && !failed) notFound();
+
   // If either load failed, pass nothing and let the page load (and show errors) in the browser as before.
   const programs = university && allPrograms ? programsForUniversity(allPrograms, university) : null;
 
